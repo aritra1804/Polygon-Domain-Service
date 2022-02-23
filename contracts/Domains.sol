@@ -11,6 +11,9 @@ import {Base64} from "./libraries/Base64.sol";
 
 import "hardhat/console.sol";
 
+error Unauthorized();
+error AlreadyRegistered();
+error InvalidName(string name);
 // We inherit the contract we imported. This means we'll have access
 // to the inherited contract's methods.
 contract Domains is ERC721URIStorage {
@@ -25,6 +28,9 @@ contract Domains is ERC721URIStorage {
   string svgPartOne = '<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 270 270"><defs><style>.cls-1{fill:url(#linear-gradient);}.cls-2{fill:#fff;}</style><linearGradient id="linear-gradient" y1="572" x2="270" y2="842" gradientTransform="translate(0 -572)" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#cb5eee"/><stop offset="1" stop-color="#0cd7e4" stop-opacity="0.99"/></linearGradient></defs><path class="cls-1" d="M0,0H270V270H0Z" transform="translate(0 0)"/><path class="cls-2" d="M72.9,42.9a4.33,4.33,0,0,0-4.4,0l-10.1,6-6.8,3.9-10.1,6a4.33,4.33,0,0,1-4.4,0l-8-4.7a4.89,4.89,0,0,1-1.6-1.6,4.28,4.28,0,0,1-.6-2.2V41a4.28,4.28,0,0,1,.6-2.2,4.1,4.1,0,0,1,1.6-1.6L37,32.6a4.33,4.33,0,0,1,4.4,0l7.9,4.6a4.89,4.89,0,0,1,1.6,1.6,4.28,4.28,0,0,1,.6,2.2v6l6.8-4.1v-6a4.28,4.28,0,0,0-.6-2.2,4.1,4.1,0,0,0-1.6-1.6L41.5,24.4a8.51,8.51,0,0,0-2.2-.4,4.56,4.56,0,0,0-2.2.6L22.2,33.3a4.1,4.1,0,0,0-1.6,1.6A3.94,3.94,0,0,0,20,37V54.4a4.28,4.28,0,0,0,.6,2.2,4.1,4.1,0,0,0,1.6,1.6l14.9,8.7a4.33,4.33,0,0,0,4.4,0l10-5.9,6.8-4.1L68.4,51a4.33,4.33,0,0,1,4.4,0l7.9,4.6a4.89,4.89,0,0,1,1.6,1.6,4.28,4.28,0,0,1,.6,2.2v9.3a4.28,4.28,0,0,1-.6,2.2,4.1,4.1,0,0,1-1.6,1.6l-7.9,4.7a4.33,4.33,0,0,1-4.4,0l-7.9-4.6A4.89,4.89,0,0,1,58.9,71a4.28,4.28,0,0,1-.6-2.2v-6l-6.8,4.1v6a4.28,4.28,0,0,0,.6,2.2,4.1,4.1,0,0,0,1.6,1.6l14.9,8.7a4.33,4.33,0,0,0,4.4,0l14.9-8.7a4.1,4.1,0,0,0,1.6-1.6,4.28,4.28,0,0,0,.6-2.2V55.5a4.28,4.28,0,0,0-.6-2.2,4.1,4.1,0,0,0-1.6-1.6l-15-8.8Z" transform="translate(0 0)"/><g id="Layer_2" data-name="Layer 2"><g id="Layer_1-2" data-name="Layer 1-2"><path class="cls-2" d="M209.2,133.6l-10.7-10.1-46.6,44.2c0-.4-.1-.6-.1-.8v-6.4a2,2,0,0,1,.7-1.6c7.3-6.9,14.6-13.9,21.9-20.8l23.4-22.2.7-.7,10.6,10.1,21.4-20.2c0,.5.1.8.1,1.1v11.2a1.61,1.61,0,0,1-.6,1.3c-1.7,1.7-3.5,3.3-5.4,5.2v-4.6l-.2-.1Z" transform="translate(0 0)"/><path class="cls-2" d="M187.9,139.3l10.7,10.1,46.5-44.2a1.09,1.09,0,0,1,.1.5v7a2.38,2.38,0,0,1-.6,1.1c-4.4,4.3-8.8,8.3-13.1,12.5l-24.8,23.6-7.7,7.3c-.2.2-.4.3-.5.4l-10.6-10.1-21.3,20.2c0-.4-.1-.7-.1-.9V155.2a1.69,1.69,0,0,1,.3-1c1.7-1.7,3.5-3.4,5.3-5.1.1-.1.2-.1.3-.2v4.5l.2.1Z" transform="translate(0 0)"/><path class="cls-2" d="M172.5,119.3v19a2,2,0,0,1-.7,1.6c-1.5,1.4-3,2.8-4.5,4.3-.2.2-.4.3-.7.6V105.1l21,19.9-4.4,4.1-10.4-9.9Z" transform="translate(0 0)"/><path class="cls-2" d="M224.6,153.8V134.5a2.11,2.11,0,0,1,.5-1.3c1.6-1.6,3.2-3.1,4.9-4.7.2-.1.4-.3.6-.4v39.7l-21-19.9,4-3.8c.5-.4.7,0,1,.2l8.8,8.3A13.47,13.47,0,0,0,224.6,153.8Z" transform="translate(0 0)"/></g></g></svg>';
   string svgPartTwo = '</text></svg>';
 
+  // Add this at the top of your contract next to the other mappings
+  mapping (uint => string) public names;
+
   mapping(string => address) public domains;
   mapping(string => string) public records;
 
@@ -33,7 +39,24 @@ contract Domains is ERC721URIStorage {
     console.log("%s name service deployed", _tld);
   }
 
+  function getAllNames() public view returns (string[] memory) {
+  console.log("Getting all names from contract");
+  string[] memory allNames = new string[](_tokenIds.current());
+  for (uint i = 0; i < _tokenIds.current(); i++) {
+    allNames[i] = names[i];
+    console.log("Name for token %d is %s", i, allNames[i]);
+  }
+
+  return allNames;
+}
+ 
+  function valid(string calldata name) public pure returns(bool) {
+  return StringUtils.strlen(name) >= 3 && StringUtils.strlen(name) <= 10;
+}
+
   function register(string calldata name) public payable {
+    if (domains[name] != address(0)) revert AlreadyRegistered();
+  if (!valid(name)) revert InvalidName(name);
     require(domains[name] == address(0));
 
     uint256 _price = this.price(name);
@@ -76,6 +99,7 @@ contract Domains is ERC721URIStorage {
     _setTokenURI(newRecordId, finalTokenUri);
     domains[name] = msg.sender;
 
+    names[newRecordId] = name;
     _tokenIds.increment();
   }
 	
@@ -104,10 +128,9 @@ contract Domains is ERC721URIStorage {
     }
 
     function setRecord(string calldata name, string calldata record) public {
-				// Check that the owner is the transaction sender
-        require(domains[name] == msg.sender);
-        records[name] = record;
-    }
+  if (msg.sender != domains[name]) revert Unauthorized();
+  records[name] = record;
+}
 
     function getRecord(string calldata name) public view returns(string memory) {
         return records[name];
