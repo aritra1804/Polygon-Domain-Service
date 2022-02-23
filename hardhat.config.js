@@ -1,11 +1,17 @@
-require("@nomiclabs/hardhat-waffle");
+require('@nomiclabs/hardhat-waffle');
+require('dotenv').config();
 
 module.exports = {
-  solidity: "0.8.10",
+  solidity: '0.8.10',
   networks: {
-		mumbai: {
-      url: "YOUR_ALCHEMY_MUMBAI_URL",
-      accounts: ["YOUR_TEST_WALLET_PRIVATE_KEY"],
-		}
-  }
+    mumbai: {
+      url: process.env.STAGING_ALCHEMY_KEY,
+      accounts: [process.env.PRIVATE_KEY],
+    },
+    mainnet: {
+      chainId: 1,
+      url: process.env.PROD_ALCHEMY_KEY,
+      accounts: [process.env.PRIVATE_KEY],
+    },
+  },
 };
